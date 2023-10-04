@@ -7,7 +7,7 @@ const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
 
 // Function to scrape and send notifications
 const scrapeAndNotify = async () => {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({headless: true});
   const page = await browser.newPage();
   const url = 'https://genshinaccounts.com/collections/honkai-star-rail-character-starter-accounts';
 
