@@ -3,7 +3,7 @@ const axios = require('axios');
 const cron = require('node-cron');
 require('dotenv').config();
 
-// Get Discord Webhook URL from environment variables
+// Discord Webhook URL
 const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
 
 // Cron schedule (e.g., every hour)
@@ -17,16 +17,18 @@ const scrapeAndNotify = async () => {
 
   await page.goto(url);
 
-  // You can add your scraping logic here to extract the desired data from the webpage.
-  // Example: Extract product titles
-  const productTitles = await page.$$eval('.product-title', (elements) =>
-    elements.map((element) => element.textContent.trim())
-  );
+  // Scrape product titles and availability
+  const productData = await page.$$eval('.card__content', (elements) => {
+    return elements.map((element) => {
+      const titleElement = element.querySelector('.card__heading a');
+      const availabilityElement = element.querySelector('.badge--bottom-left');
 
-  // Example: Extract product availability (you might need to customize this based on the site's structure)
-  const productAvailability = await page.$$eval('.product-availability', (elements) =>
-    elements.map((element) => element.textContent.trim())
-  );
+      const title = titleElement ? titleElement.textContent.trim() : 'N/A';
+      const availability = availabilityElement ? availabilityElement.textContent.trim() : 'N/A';
+
+      return { title, availability };
+    });
+  });
 
   // Close the browser when done
   await browser.close();
@@ -35,20 +37,20 @@ const scrapeAndNotify = async () => {
   const embeds = [];
 
   // Check which products are back in stock and create embeds
-  for (let i = 0; i < productTitles.length; i++) {
-    if (productAvailability[i] === 'In Stock') {
+  for (const { title, availability } of productData) {
+    if (availability === 'In Stock') {
       // Product is in stock, create a Discord embed
       const embed = {
-        title: `${productTitles[i]} is back in stock on ${url}`,
+        title: `${title} is back in stock on ${url}`,
         color: 0x00FF00, // Green color
         timestamp: new Date(),
       };
 
       embeds.push(embed);
 
-      console.log(`${productTitles[i]} is back in stock! Notification sent.`);
+      console.log(`${title} is back in stock! Notification sent.`);
     } else {
-      console.log(`${productTitles[i]} is still out of stock.`);
+      console.log(`${title} is still out of stock.`);
     }
   }
 
