@@ -1,13 +1,9 @@
 const puppeteer = require('puppeteer');
 const axios = require('axios');
-const cron = require('node-cron');
 require('dotenv').config();
 
 // Discord Webhook URL
 const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-
-// Cron schedule (e.g., every hour)
-const cronSchedule = '0 * * * *'; // Runs every hour
 
 // Function to scrape and send notifications
 const scrapeAndNotify = async () => {
@@ -62,10 +58,11 @@ const scrapeAndNotify = async () => {
 
     await axios.post(webhookUrl, message);
   }
+
+  // Wait for a specified interval (e.g., 1 hour) before running again
+  const intervalInMilliseconds = 60 * 60 * 1000; // 1 hour
+  setTimeout(scrapeAndNotify, intervalInMilliseconds);
 };
 
-// Schedule the script to run at the specified interval
-cron.schedule(cronSchedule, () => {
-  console.log('Running the script...');
-  scrapeAndNotify().catch((error) => console.error('Error:', error));
-});
+// Start the script
+scrapeAndNotify().catch((error) => console.error('Error:', error));
