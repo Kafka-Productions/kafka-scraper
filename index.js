@@ -1,9 +1,10 @@
 const puppeteer = require('puppeteer');
 const axios = require('axios');
 const cron = require('node-cron');
+require('dotenv').config();
 
-// Discord Webhook URL
-const webhookUrl = 'YOUR_DISCORD_WEBHOOK_URL';
+// Get Discord Webhook URL from environment variables
+const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
 
 // Cron schedule (e.g., every hour)
 const cronSchedule = '0 * * * *'; // Runs every hour
